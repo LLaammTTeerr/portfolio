@@ -4,3 +4,6 @@ _site.old/
 __pycache__/
 *.pyc
 .DS_Store
+
+# private documents — never publish
+*.pdf
