@@ -29,9 +29,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.13'
           cache: pip
@@ -45,7 +45,7 @@ jobs:
             --base-url https://staging.lamter.cc --cname staging.lamter.cc \
             --label "${GITHUB_REF_NAME}@${GITHUB_SHA::7}"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: staging-site
           path: _site
@@ -61,7 +61,7 @@ jobs:
       name: staging
       url: https://staging.lamter.cc
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: staging-site
           path: site
@@ -71,6 +71,10 @@ jobs:
           DEPLOY_KEY: ${{ secrets.STAGING_DEPLOY_KEY }}
         run: |
           set -euo pipefail
+          if [ -z "${DEPLOY_KEY}" ]; then
+            echo "::error::Secret STAGING_DEPLOY_KEY is missing from the 'staging' environment. See README → Environments."
+            exit 1
+          fi
           install -m 700 -d ~/.ssh
           printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/staging_key
           chmod 600 ~/.ssh/staging_key
