@@ -108,7 +108,7 @@
 
   function renderHero() {
     const words = String(P.name || "Your Name").trim().split(/\s+/);
-    const lines = words.length > 1 ? [words[0], words.slice(1).join(" ")] : [words[0]];
+    const lines = list(P.nameLines).length ? P.nameLines : words.length > 1 ? [words[0], words.slice(1).join(" ")] : [words[0]];
     const rot = list(P.rotatingWords);
     $("#hero-inner").innerHTML = `
       <div class="hero-top mono reveal">
@@ -221,7 +221,7 @@
             ${ex.map((e, i) => `
             <li class="stop" data-stop="${i}">
               <span class="waypoint" aria-hidden="true"></span>
-              <div class="stop-when mono reveal"><b>${esc(e.start)} — ${esc(e.end)}</b>WP-${pad(i + 1)} · ${esc(e.place)}</div>
+              <div class="stop-when mono reveal"><b>${esc(e.start)}${e.end ? ` — ${esc(e.end)}` : ""}</b>WP-${pad(i + 1)} · ${esc(e.place)}</div>
               <div class="reveal" style="--d:80ms">
                 <h3 class="stop-role">${esc(e.role)}</h3>
                 <p class="stop-org"><span class="at">at</span> ${esc(e.org)}</p>
@@ -269,14 +269,30 @@
     // Real posts (inlined by build.py) win over the placeholder cards in content.js.
     const built = Array.isArray(window.PORTFOLIO_NOTES) && window.PORTFOLIO_NOTES.length ? window.PORTFOLIO_NOTES : null;
     const notes = built || list(D.notes);
+    if (!notes.length) {        // nothing published yet: one quiet "coming soon" card
+      $("#notes").innerHTML = `
+        <div class="container">
+          ${secHead("notes")}
+          <div class="notes-grid">
+            <a class="note note-archive note-soon reveal" href="${esc((S.notes && S.notes.archiveUrl) || "#")}" style="--span:3">
+              <div class="note-top mono"><span class="note-kind">Logbook</span><span>Entry 001</span></div>
+              <h3 class="note-title">The first entry is being written.</h3>
+              <div class="note-foot mono"><span>Follow along via RSS</span>${ICON.arrowUR}</div>
+            </a>
+          </div>
+        </div>`;
+      return;
+    }
     // An "archive" card closes the bento grid: it spans whatever columns the last row has left.
     const archive = S.notes && S.notes.archiveUrl;
-    const used = notes.length ? 4 + (notes.length - 1) : 0;
+    // The featured card is 2×2 when others stack beside it; alone it's one wide row.
+    const solo = notes.length === 1;
+    const used = solo ? 2 : 4 + (notes.length - 1);
     const span = 3 - (used % 3);
     $("#notes").innerHTML = `
       <div class="container">
         ${secHead("notes")}
-        <div class="notes-grid">
+        <div class="notes-grid${solo ? " solo" : ""}">
           ${notes.map((n, i) => `
           <a class="note reveal" href="${esc(n.url || "#")}" style="--d:${(i % 3) * 80}ms">
             <div class="note-top mono"><span class="note-kind">${esc(n.kind)}${n.lang ? ` · ${esc(n.lang)}` : ""}${n.draft ? " · Draft" : ""}</span><span>${fmtDate(n.date)}</span></div>
@@ -346,7 +362,9 @@
   }
 
   function renderFooter() {
-    const name = String(P.name || "").trim().split(/\s+/);
+    const words = String(P.name || "").trim().split(/\s+/);
+    const name = list(P.nameLines).length ? P.nameLines : [words[0] || "", words.slice(1).join(" ")];
+    const chars = name.join(" ").length;
     const year = (D.meta && D.meta.year) || new Date().getFullYear();
     $("#site-footer").innerHTML = `
       <div class="container footer-grid mono">
@@ -355,7 +373,7 @@
         <div><b>Local time</b><span id="footer-clock">--:--:--</span><br>${esc(LOC.label || "")}</div>
         <div><b>Navigate</b><a class="to-top" href="#top">Back to top ↑</a><br><a href="#" data-open-palette>Command palette</a></div>
       </div>
-      <div class="footer-mark" aria-hidden="true">${esc(name[0] || "")}${name.length > 1 ? ` <em>${esc(name.slice(1).join(" "))}</em>` : ""}</div>`;
+      <div class="footer-mark" aria-hidden="true" style="--chars:${chars}">${esc(name[0] || "")}${name[1] ? ` <em>${esc(name[1])}</em>` : ""}</div>`;
   }
 
   /* =====================================================================
