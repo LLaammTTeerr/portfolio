@@ -1,0 +1,86 @@
+# Staging: every push to the `staging` branch is built WITH drafts and
+# published to https://staging.lamter.cc.
+#
+# GitHub Pages gives each repository one site and one domain, and this repo's
+# belongs to production. So staging is published into a second repository,
+# LLaammTTeerr/portfolio-staging, which holds nothing but built output on its
+# `gh-pages` branch. Its Pages site serves that branch at staging.lamter.cc.
+#
+# The push uses a deploy key scoped to that one repository (secret
+# STAGING_DEPLOY_KEY). As in production.yml, the key is only available to the
+# `publish` job, which runs no code from this repository.
+name: Staging
+
+on:
+  push:
+    branches: [staging]
+  # sync-staging.yml dispatches this after merging main into staging, because
+  # pushes made with the workflow token don't trigger `push` workflows.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staging
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+
+      - name: Install build dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build (drafts included, noindex)
+        run: |
+          python build.py --drafts --staging \
+            --base-url https://staging.lamter.cc --cname staging.lamter.cc \
+            --label "${GITHUB_REF_NAME}@${GITHUB_SHA::7}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: staging-site
+          path: _site
+          include-hidden-files: true   # keep .nojekyll
+          retention-days: 3
+
+  publish:
+    needs: build
+    # Only the staging branch publishes; a manual run from another branch just builds.
+    if: github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.lamter.cc
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: staging-site
+          path: site
+
+      - name: Push to LLaammTTeerr/portfolio-staging (gh-pages)
+        env:
+          DEPLOY_KEY: ${{ secrets.STAGING_DEPLOY_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/staging_key
+          chmod 600 ~/.ssh/staging_key
+          ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
+          cd site
+          git init -q -b gh-pages
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Staging build of ${GITHUB_REPOSITORY}@${GITHUB_SHA::7}"
+          GIT_SSH_COMMAND="ssh -i ~/.ssh/staging_key -o IdentitiesOnly=yes" \
+            git push -f git@github.com:LLaammTTeerr/portfolio-staging.git gh-pages
+          rm -f ~/.ssh/staging_key

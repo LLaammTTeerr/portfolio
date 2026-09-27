@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  {{ robots }}
+  <title>{{ page_title }}</title>
+  <meta name="description" content="{{ description }}">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="{{ title }}">
+  <meta property="og:description" content="{{ description }}">
+  <meta property="article:published_time" content="{{ date_iso }}">
+  {{ canonical }}
+  <link rel="alternate" type="application/atom+xml" title="Field Notes" href="{{ root }}feed.xml">
+  <link rel="icon" href="{{ root }}favicon.svg" type="image/svg+xml">
+  <script>
+    (function () {
+      var saved = null;
+      try { saved = localStorage.getItem("atlas-theme"); } catch (e) {}
+      var dark = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.setAttribute("data-theme", saved || (dark ? "dark" : "light"));
+      document.documentElement.classList.add("js");
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="{{ root }}css/style.css">
+  <link rel="stylesheet" href="{{ root }}css/notes.css">
+  {{ katex }}
+  <script defer src="{{ root }}js/terrain.js"></script>
+  <script defer src="{{ root }}js/notes.js"></script>
+</head>
+<body class="notes-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="trail" aria-hidden="true"><div class="trail-walked" id="trail"></div></div>
+  {{ staging_banner }}
+  {{ header }}
+
+  <main id="main">
+    <article class="post {{ has_toc }}" lang="{{ lang }}">
+      <header class="post-head">
+        <div class="post-meta mono">
+          <span class="accent">Entry {{ entry }}</span>
+          <span>{{ kind }}</span>
+          <time datetime="{{ date_iso }}">{{ date_human }}</time>
+          <span>{{ minutes }}</span>
+          <span class="lang-tag" title="{{ lang_name }}">{{ lang_label }}</span>
+        </div>
+        {{ draft_badge }}
+        <h1 class="post-title">{{ title }}</h1>
+        <p class="post-summary">{{ summary }}</p>
+        {{ tags }}
+      </header>
+
+      <figure class="post-map" aria-hidden="true">
+        <canvas data-tile data-seed="{{ seed }}" data-hue="{{ hue }}"></canvas>
+        <span class="coords mono">{{ coords }} · Entry {{ entry }}</span>
+      </figure>
+
+      <div class="post-layout">
+        <div class="prose">
+{{ content }}
+        </div>
+        {{ toc }}
+      </div>
+
+      <footer class="post-end">
+        <p class="end-mark mono"><span aria-hidden="true">◆</span> End of entry {{ entry }}</p>
+        <div class="author-card">
+          <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+            <circle cx="16" cy="16" r="14.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+            <path class="brand-needle" d="M16 4.5l3.2 11.5L16 14l-3.2 2z"/>
+            <path d="M16 27.5l-3.2-11.5L16 18l3.2-2z" fill="currentColor" opacity=".35"/>
+          </svg>
+          <p>Surveyed &amp; written by <a href="{{ root }}">{{ author }}</a>. More in the <a href="{{ root }}notes/">logbook</a>, or follow along via <a href="{{ root }}feed.xml">RSS</a>.</p>
+        </div>
+        <nav class="prev-next" aria-label="More entries">{{ prev }}{{ next }}</nav>
+      </footer>
+    </article>
+  </main>
+
+  {{ footer }}
+  <div class="toast mono" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

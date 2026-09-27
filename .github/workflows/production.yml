@@ -1,0 +1,55 @@
+# Production: every push to `main` is built without drafts and published to
+# GitHub Pages at https://lamter.cc.
+#
+# Same split as the other Pages site in this account: `build` runs the
+# project's code with read-only access, and `deploy` holds the Pages token but
+# runs nothing of ours, only GitHub's deploy action on the finished artifact.
+name: Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+
+      - name: Install build dependencies
+        run: pip install -r requirements.txt
+
+      # No --drafts: posts with `draft: true` never reach production.
+      - name: Build
+        run: python build.py --base-url https://lamter.cc --cname lamter.cc
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    # Pages refuses concurrent deployments; never cancel one half-way.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

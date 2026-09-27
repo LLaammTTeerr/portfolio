@@ -1,0 +1,6 @@
+_site/
+_site.tmp/
+_site.old/
+__pycache__/
+*.pyc
+.DS_Store

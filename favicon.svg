@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .bg{fill:#EFE9DD}.ink{stroke:#1A1915}.acc{fill:#E0512B}
+    @media (prefers-color-scheme: dark){.bg{fill:#0D1014}.ink{stroke:#ECE6D8}.acc{fill:#FF7447}}
+  </style>
+  <rect class="bg" width="64" height="64" rx="14"/>
+  <g class="ink" fill="none" stroke-width="2.5" stroke-linecap="round">
+    <path d="M12 40c6-9 12-12 20-9s14 1 20-7" opacity=".45"/>
+    <path d="M12 48c7-6 13-7 20-4s14 2 20-5" opacity=".7"/>
+  </g>
+  <path class="acc" d="M32 10l6 16-6-3-6 3z"/>
+</svg>
