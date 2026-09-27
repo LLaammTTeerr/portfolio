@@ -285,12 +285,14 @@
     }
     // An "archive" card closes the bento grid: it spans whatever columns the last row has left.
     const archive = S.notes && S.notes.archiveUrl;
-    const used = notes.length ? 4 + (notes.length - 1) : 0;
+    // The featured card is 2×2 when others stack beside it; alone it's one wide row.
+    const solo = notes.length === 1;
+    const used = solo ? 2 : 4 + (notes.length - 1);
     const span = 3 - (used % 3);
     $("#notes").innerHTML = `
       <div class="container">
         ${secHead("notes")}
-        <div class="notes-grid">
+        <div class="notes-grid${solo ? " solo" : ""}">
           ${notes.map((n, i) => `
           <a class="note reveal" href="${esc(n.url || "#")}" style="--d:${(i % 3) * 80}ms">
             <div class="note-top mono"><span class="note-kind">${esc(n.kind)}${n.lang ? ` · ${esc(n.lang)}` : ""}${n.draft ? " · Draft" : ""}</span><span>${fmtDate(n.date)}</span></div>

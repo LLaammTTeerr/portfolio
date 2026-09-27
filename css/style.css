@@ -576,7 +576,7 @@ html:not(.js) .split .w > span { transform: none; }
 
 /* 10. FIELD NOTES ------------------------------------------------------------ */
 .notes-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
-@media (min-width: 900px) { .notes-grid { grid-template-columns: repeat(3, 1fr); } .note:first-child { grid-column: span 2; grid-row: span 2; } .note.note-archive { grid-column: span var(--span, 1); } .note.note-soon { grid-column: 1 / -1; grid-row: auto; } }
+@media (min-width: 900px) { .notes-grid { grid-template-columns: repeat(3, 1fr); } .note:first-child { grid-column: span 2; grid-row: span 2; } .note.note-archive { grid-column: span var(--span, 1); } .note.note-soon { grid-column: 1 / -1; grid-row: auto; } .notes-grid.solo .note:first-child { grid-row: auto; } }
 .note.note-archive { background: var(--ink); color: var(--paper); border-color: var(--ink); min-height: 200px; }
 .note.note-soon .note-title { max-width: 22ch; }
 .note-archive .note-top, .note-archive .note-foot { color: color-mix(in srgb, var(--paper) 60%, transparent); }
